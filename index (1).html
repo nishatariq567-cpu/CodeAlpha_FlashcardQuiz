@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flashcard Quiz App</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef2f7;color:#1c2b3a;display:flex;justify-content:center;padding:20px}
+.app{width:100%;max-width:480px}
+h1{text-align:center;font-size:24px;margin:8px 0 4px}
+.count{text-align:center;color:#5a6b7d;margin-bottom:14px}
+.card{background:#fff;border:2px solid #2f5d8a;border-radius:16px;min-height:200px;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-size:22px;box-shadow:0 6px 18px rgba(47,93,138,.15)}
+.card small{color:#2f5d8a;font-size:13px;margin-bottom:10px}
+.card.back{background:#e6f2ea;border-color:#2e7d4f}
+.card.back small{color:#2e7d4f}
+.row{display:flex;gap:10px;margin-top:12px}
+button{flex:1;padding:12px;border:0;border-radius:10px;font-size:16px;cursor:pointer;background:#2f5d8a;color:#fff}
+button:hover{background:#244a6f}
+button.alt{background:#fff;color:#2f5d8a;border:2px solid #2f5d8a}
+button.del{background:#b53a3a}
+button:focus-visible,input:focus-visible{outline:3px solid #f0a020}
+.form{background:#fff;border-radius:16px;padding:16px;margin-top:20px}
+.form h2{font-size:17px;margin:0 0 10px}
+input{width:100%;padding:11px;margin-bottom:8px;border:1px solid #b8c4d0;border-radius:8px;font-size:15px}
+.empty{color:#5a6b7d}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Flashcard Quiz</h1>
+  <div class="count" id="count"></div>
+  <div class="card" id="card" aria-live="polite"></div>
+  <div class="row">
+    <button class="alt" id="prev">Previous</button>
+    <button id="show">Show Answer</button>
+    <button class="alt" id="next">Next</button>
+  </div>
+  <div class="row">
+    <button class="alt" id="edit">Edit card</button>
+    <button class="del" id="del">Delete card</button>
+  </div>
+  <div class="form">
+    <h2 id="formTitle">Add a new flashcard</h2>
+    <input id="q" placeholder="Question">
+    <input id="a" placeholder="Answer">
+    <div class="row">
+      <button id="save">Add card</button>
+      <button class="alt" id="cancel" style="display:none">Cancel edit</button>
+    </div>
+  </div>
+</div>
+<script>
+const KEY = "codealpha_flashcards";
+const defaults = [
+  {q: "What is the capital of Pakistan?", a: "Islamabad"},
+  {q: "Which language is used for AI and machine learning most?", a: "Python"},
+  {q: "What does HTML stand for?", a: "HyperText Markup Language"}
+];
+let cards = [];
+try { cards = JSON.parse(localStorage.getItem(KEY)) || defaults; } catch (e) { cards = defaults; }
+let i = 0, showing = false, editing = -1;
+
+const $ = id => document.getElementById(id);
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(cards)); } catch (e) {} }
+
+function render() {
+  const card = $("card");
+  if (!cards.length) {
+    card.className = "card";
+    card.innerHTML = '<span class="empty">No flashcards yet. Add one below.</span>';
+    $("count").textContent = "0 cards";
+    return;
+  }
+  if (i >= cards.length) i = cards.length - 1;
+  const c = cards[i];
+  card.className = "card" + (showing ? " back" : "");
+  card.innerHTML = "";
+  const label = document.createElement("small");
+  label.textContent = showing ? "Answer" : "Question";
+  const text = document.createElement("div");
+  text.textContent = showing ? c.a : c.q;
+  card.append(label, text);
+  $("count").textContent = "Card " + (i + 1) + " of " + cards.length;
+  $("show").textContent = showing ? "Hide Answer" : "Show Answer";
+}
+
+$("show").onclick = () => { if (cards.length) { showing = !showing; render(); } };
+$("next").onclick = () => { if (cards.length) { i = (i + 1) % cards.length; showing = false; render(); } };
+$("prev").onclick = () => { if (cards.length) { i = (i - 1 + cards.length) % cards.length; showing = false; render(); } };
+
+function resetForm() {
+  editing = -1; $("q").value = ""; $("a").value = "";
+  $("formTitle").textContent = "Add a new flashcard";
+  $("save").textContent = "Add card"; $("cancel").style.display = "none";
+}
+$("save").onclick = () => {
+  const q = $("q").value.trim(), a = $("a").value.trim();
+  if (!q || !a) { alert("Please enter both a question and an answer."); return; }
+  if (editing >= 0) { cards[editing] = {q, a}; i = editing; }
+  else { cards.push({q, a}); i = cards.length - 1; }
+  showing = false; persist(); resetForm(); render();
+};
+$("edit").onclick = () => {
+  if (!cards.length) return;
+  editing = i; $("q").value = cards[i].q; $("a").value = cards[i].a;
+  $("formTitle").textContent = "Edit flashcard";
+  $("save").textContent = "Save changes"; $("cancel").style.display = "block";
+  $("q").focus();
+};
+$("cancel").onclick = resetForm;
+$("del").onclick = () => {
+  if (!cards.length) return;
+  if (confirm("Delete this flashcard?")) { cards.splice(i, 1); showing = false; persist(); resetForm(); render(); }
+};
+render();
+</script>
+</body>
+</html>
