@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Random Quote Generator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#1f3a4d;font-family:Georgia,serif}
+.box{background:#fdfaf3;max-width:520px;width:100%;padding:34px 28px;border-radius:14px;text-align:center}
+.mark{font-size:60px;line-height:.6;color:#c4572f;height:30px}
+#text{font-size:24px;line-height:1.5;margin:14px 0;color:#1f2a33;min-height:110px;display:flex;align-items:center;justify-content:center}
+#author{font-size:17px;color:#4a5a66;font-style:italic;margin-bottom:24px}
+button{font:inherit;font-size:16px;padding:12px 26px;border:0;border-radius:30px;background:#1f3a4d;color:#fff;cursor:pointer}
+button:hover{background:#c4572f}
+button:focus-visible{outline:3px solid #f0a020}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="mark">&ldquo;</div>
+  <div id="text" aria-live="polite"></div>
+  <div id="author"></div>
+  <button id="btn">New Quote</button>
+</div>
+<script>
+const quotes = [
+  {t: "The only way to do great work is to love what you do.", a: "Steve Jobs"},
+  {t: "It always seems impossible until it is done.", a: "Nelson Mandela"},
+  {t: "Believe you can and you are halfway there.", a: "Theodore Roosevelt"},
+  {t: "Success is not final, failure is not fatal: it is the courage to continue that counts.", a: "Winston Churchill"},
+  {t: "The future belongs to those who believe in the beauty of their dreams.", a: "Eleanor Roosevelt"},
+  {t: "Do what you can, with what you have, where you are.", a: "Theodore Roosevelt"},
+  {t: "Knowledge is power.", a: "Francis Bacon"},
+  {t: "Dream is not that which you see while sleeping, it is that which does not let you sleep.", a: "A. P. J. Abdul Kalam"},
+  {t: "You must be the change you wish to see in the world.", a: "Mahatma Gandhi"},
+  {t: "Success is the sum of small efforts repeated day in and day out.", a: "Robert Collier"},
+  {t: "Hard work beats talent when talent does not work hard.", a: "Tim Notke"},
+  {t: "Self-belief and hard work will always earn you success.", a: "Virat Kohli"}
+];
+let last = -1;
+function newQuote() {
+  let n;
+  do { n = Math.floor(Math.random() * quotes.length); } while (n === last && quotes.length > 1);
+  last = n;
+  document.getElementById("text").textContent = quotes[n].t;
+  document.getElementById("author").textContent = "— " + quotes[n].a;
+}
+document.getElementById("btn").onclick = newQuote;
+newQuote();
+</script>
+</body>
+</html>
